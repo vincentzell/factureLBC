@@ -284,9 +284,30 @@ document.addEventListener('DOMContentLoaded', () => {
       const profileUrl = idMatch ? `https://www.leboncoin.fr/profile/${idMatch[0]}` : url;
       if (profileStatus) profileStatus.textContent = 'Récupération du profil...';
       try {
-        const res = await fetch('https://r.jina.ai/' + profileUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const md = await res.text();
+        const endpoints = [
+          'https://r.jina.ai/' + profileUrl,
+          'https://api.allorigins.win/get?url=' + encodeURIComponent(profileUrl)
+        ];
+        let md = '';
+        let lastError = null;
+        for (const endpoint of endpoints) {
+          try {
+            const res = await fetch(endpoint);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const raw = await res.text();
+            try {
+              const json = JSON.parse(raw);
+              if (json && json.contents) md = json.contents;
+              else md = raw;
+            } catch (e) {
+              md = raw;
+            }
+            if (md && md.length > 100) break;
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        if (!md) throw (lastError || new Error('Aucune réponse'));
         const nameM = md.match(/Title:\s*Profil de (.+)/i) || md.match(/^#\s+(.+)$/m);
         if (nameM) setValue('sellerName', nameM[1].trim());
         const locM = md.match(/Localisé dans le département (.+)/i) || md.match(/Membre depuis [^\n]*\n\n\*\s*(.+)/i);
