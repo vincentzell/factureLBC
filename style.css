@@ -129,7 +129,11 @@ input, textarea, select {
   align-items: center;
   justify-content: flex-end;
 }
-.line { border-bottom: 1px solid var(--text); height: 40px; }
+.line {
+  border-bottom: 1px solid var(--text);
+  height: 40px;
+  width: 100%;
+}
 .date-line { margin-top: 1.5rem; }
 
 .app-footer { text-align: center; color: var(--muted); padding: 1rem; }
