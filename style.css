@@ -149,3 +149,12 @@ input, textarea, select {
   text-decoration: underline;
   word-break: break-all;
 }
+
+a.sig-name {
+  color: #111827;
+  text-decoration: none;
+}
+
+a.sig-name:hover {
+  text-decoration: underline;
+}
