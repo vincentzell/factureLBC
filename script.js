@@ -17,56 +17,123 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setValue(id, value) {
     const el = document.getElementById(id);
-    if (el && value) el.value = value;
+    if (!el || !value) return;
+    if (el.tagName === 'SELECT') {
+      let option = Array.from(el.options).find(o => o.value === value);
+      if (!option) {
+        option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        el.appendChild(option);
+      }
+    }
+    el.value = value;
   }
 
-  function parseLeboncoin(text) {
+  function decodeQuotedPrintable(str) {
+    str = str.replace(/=\r?\n/g, '');
+    str = str.replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    return str;
+  }
+
+  function htmlToText(html) {
+    let text = html;
+    text = text.replace(/<br\s*\/?>/gi, '\n');
+    text = text.replace(/<\/(p|div|tr|li|td|h\d|table)>/gi, '\n');
+    text = text.replace(/<[^>]+>/g, ' ');
+    text = text.replace(/&nbsp;/gi, ' ');
+    text = text.replace(/&euro;/gi, '€');
+    text = text.replace(/&amp;/gi, '&');
+    text = text.replace(/&lt;/gi, '<');
+    text = text.replace(/&gt;/gi, '>');
+    text = text.replace(/&quot;/gi, '"');
+    text = text.replace(/&#39;/g, "'");
+    text = text.replace(/&apos;/gi, "'");
+    text = text.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)));
+    text = text.replace(/[ \t]+/g, ' ');
+    text = text.replace(/\n{3,}/g, '\n\n');
+    return text;
+  }
+
+  function parseEmailDate(text) {
+    const m = text.match(/^Date:\s*(.+)$/mi);
+    if (!m) return '';
+    const dateStr = m[1].trim();
+    const dayM = dateStr.match(/(\d{1,2})\s+[A-Za-z]{3}/);
+    const monthM = dateStr.match(/\d{1,2}\s+([A-Za-z]{3})/);
+    const yearM = dateStr.match(/\s(\d{4})/);
+    if (!dayM || !monthM || !yearM) return '';
+    const months = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06', Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+    const month = months[monthM[1]];
+    if (!month) return '';
+    return `${yearM[1]}-${month}-${dayM[1].padStart(2, '0')}`;
+  }
+
+
+  function parseLeboncoin(raw) {
+    const decoded = decodeQuotedPrintable(raw);
+    const text = htmlToText(decoded);
     const result = {};
+
+    const buyerM = text.match(/Bonjour\s+([^,\n]+),/i);
+    if (buyerM) result.buyerName = buyerM[1].trim();
+
+    const itemM = text.match(/([A-Za-z0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
+    if (itemM) {
+      result.itemTitle = itemM[1].trim();
+      result.itemPrice = itemM[2].replace(/\s/g, '').replace(',', '.');
+    }
+
+    const txM = text.match(/Numéro de transaction\s*:\s*(\d+)/i);
+    if (txM) result.transactionId = txM[1].trim();
+
+    const addrM = text.match(/adresse suivante\s*:\s*(.+?)(?:Voir le point|Merci|L['’]équipe|$)/is);
+    if (addrM) {
+      result.buyerAddress = addrM[1].replace(/\s+/g, ' ').trim();
+    }
+
+    const saleDate = parseEmailDate(decoded);
+    if (saleDate) result.saleDate = saleDate;
+
+    if (/transaction s[ée]curis[ée]e/i.test(text)) {
+      result.paymentMethod = 'Transaction sécurisée Leboncoin';
+    }
+
     const lineMatch = (label) => {
       const re = new RegExp(label + '\\s*[:\\-]\\s*(.+)', 'i');
       const m = text.match(re);
       return m ? m[1].trim() : '';
     };
-
-    result.sellerName = lineMatch('vendeur') || lineMatch('vendu par');
-    result.buyerName = lineMatch('acheteur') || lineMatch('acheté par');
-    result.itemTitle = lineMatch('objet') || lineMatch('article') || lineMatch('annonce') || lineMatch('produit');
-    result.itemDescription = lineMatch('description') || lineMatch('détails');
-
-    const priceM = text.match(/(?:prix|montant|total)\s*[:\-]?\s*([\d\s.,]+)\s*€?/i);
-    if (priceM) {
-      result.itemPrice = priceM[1].replace(/\s/g, '').replace(',', '.');
+    if (!result.sellerName) result.sellerName = lineMatch('vendeur') || lineMatch('vendu par');
+    if (!result.itemTitle) result.itemTitle = lineMatch('objet') || lineMatch('article') || lineMatch('annonce') || lineMatch('produit');
+    if (!result.itemDescription) result.itemDescription = lineMatch('description') || lineMatch('détails');
+    if (!result.itemPrice) {
+      const priceM = text.match(/(?:prix|montant|total)\s*[:\-]?\s*([\d\s.,]+)\s*€?/i);
+      if (priceM) result.itemPrice = priceM[1].replace(/\s/g, '').replace(',', '.');
     }
-
-    const txM = text.match(/(?:commande|référence|transaction|n°\s*annonce|annonce)\s*(?:n°|numéro|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
-    if (txM) result.transactionId = txM[1].trim();
-
-    const dateM = text.match(/date\s*[:\-]?\s*(\d{1,2}[\/\-\.\\s]\d{1,2}[\/\-\.\\s]\d{2,4})/i);
-    if (dateM) {
-      const parts = dateM[1].trim().split(/[\/\-\.\\s]+/);
-      if (parts.length === 3) {
-        let [d, m, y] = parts;
-        if (y.length === 2) y = '20' + y;
-        result.saleDate = `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+    if (!result.transactionId) {
+      const txM2 = text.match(/(?:commande|référence|transaction|n°\s*annonce|annonce)\s*(?:n°|numéro|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
+      if (txM2) result.transactionId = txM2[1].trim();
+    }
+    if (!result.saleDate) {
+      const dateM = text.match(/date\s*[:\-]?\s*(\d{1,2}[\/\-\.\\s]\d{1,2}[\/\-\.\\s]\d{2,4})/i);
+      if (dateM) {
+        const parts = dateM[1].trim().split(/[\/\-\.\\s]+/);
+        if (parts.length === 3) {
+          let [d, m, y] = parts;
+          if (y.length === 2) y = '20' + y;
+          result.saleDate = `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        }
       }
     }
-
-    const payM = text.match(/(?:paiement|mode de paiement)\s*[:\-]?\s*(.+)/i);
-    if (payM) {
-      const pay = payM[1].trim();
-      const select = document.getElementById('paymentMethod');
-      const option = Array.from(select.options).find(o => o.value.toLowerCase() === pay.toLowerCase());
-      if (option) result.paymentMethod = option.value;
-      else result.paymentMethod = pay;
-    }
-
     const sellerAddr = lineMatch('adresse vendeur') || lineMatch('adresse du vendeur');
     if (sellerAddr) result.sellerAddress = sellerAddr;
-    const buyerAddr = lineMatch('adresse acheteur') || lineMatch('adresse de l.acheteur');
-    if (buyerAddr) result.buyerAddress = buyerAddr;
+    const buyerAddr2 = lineMatch('adresse acheteur') || lineMatch('adresse de l.acheteur');
+    if (buyerAddr2 && !result.buyerAddress) result.buyerAddress = buyerAddr2;
 
     return result;
   }
+
 
   parseBtn.addEventListener('click', () => {
     const text = pasteInput.value.trim();
