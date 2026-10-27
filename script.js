@@ -283,7 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nameM) setValue('sellerName', nameM[1].trim());
         const locM = md.match(/Localisé dans le département (.+)/i) || md.match(/Membre depuis [^\n]*\n\n\*\s*(.+)/i);
         if (locM) setValue('sellerAddress', locM[1].trim());
-        if (profileStatus) profileStatus.textContent = nameM ? 'Profil récupéré.' : 'Profil chargé, nom non trouvé (colle-le manuellement).';
+        const emailM = md.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+        const phoneM = md.match(/(?:\+33|0)\s?[1-9](?:[\s.-]?\d{2}){4}/);
+        let extra = '';
+        if (emailM) extra += ' Email: ' + emailM[0];
+        if (phoneM) extra += ' Tél: ' + phoneM[0];
+        if (profileStatus) profileStatus.textContent = (nameM ? 'Profil récupéré.' : 'Profil chargé, nom non trouvé (colle-le manuellement).') + extra;
       } catch (err) {
         if (profileStatus) profileStatus.textContent = 'Impossible de récupérer le profil (CORS/réseau). Colle les infos manuellement.';
         console.error(err);
@@ -312,6 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const g = (id) => document.getElementById(id).value.trim();
     document.getElementById('cSeller').textContent = g('sellerName');
     document.getElementById('cSellerAddr').textContent = g('sellerAddress') || '—';
+    const sellerSig = document.getElementById('cSellerSig');
+    const sellerName = g('sellerName');
+    const sellerProfileUrl = document.getElementById('sellerProfileUrl').value.trim();
+    sellerSig.textContent = sellerName || '';
+    if (sellerProfileUrl) {
+      sellerSig.href = sellerProfileUrl;
+    } else {
+      sellerSig.removeAttribute('href');
+    }
     document.getElementById('cBuyer').textContent = g('buyerName');
     document.getElementById('cBuyerAddr').textContent = g('buyerAddress') || '—';
     document.getElementById('cItem').textContent = g('itemTitle');
