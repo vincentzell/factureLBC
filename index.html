@@ -26,81 +26,103 @@
     <section class="card">
       <h2>2. Informations de la vente</h2>
       <form id="saleForm">
-        <div class="grid">
-          <div class="field">
-            <label for="sellerProfileUrl">Profil vendeur (URL Leboncoin)</label>
-            <input type="text" id="sellerProfileUrl" placeholder="https://www.leboncoin.fr/profile/..." />
+        <div class="form-block">
+          <h3>Vendeur</h3>
+          <div class="grid">
+            <div class="field">
+              <label for="sellerProfileUrl">Profil vendeur (URL Leboncoin)</label>
+              <input type="text" id="sellerProfileUrl" placeholder="https://www.leboncoin.fr/profile/..." />
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button type="button" id="fetchProfileBtn" class="btn strong">Récupérer profil</button>
+            </div>
+            <p id="profileStatus" class="status"></p>
+            <div class="field">
+              <label for="sellerName">Nom du vendeur</label>
+              <input type="text" id="sellerName" name="sellerName" required />
+            </div>
+            <div class="field">
+              <label for="sellerAddress">Adresse du vendeur</label>
+              <input type="text" id="sellerAddress" name="sellerAddress" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-block">
+          <h3>Acheteur</h3>
+          <div class="grid">
+            <div class="field">
+              <label for="buyerName">Nom de l'acheteur</label>
+              <input type="text" id="buyerName" name="buyerName" required />
+            </div>
+            <div class="field">
+              <label for="buyerAddress">Adresse de l'acheteur</label>
+              <input type="text" id="buyerAddress" name="buyerAddress" />
+            </div>
+            <div class="field">
+              <label for="deliveryAddress">Adresse de livraison</label>
+              <input type="text" id="deliveryAddress" name="deliveryAddress" />
+            </div>
           </div>
           <div class="actions">
-            <button type="button" id="fetchProfileBtn" class="btn">Récupérer profil</button>
+            <button type="button" id="elzeprodBtn" class="btn strong">Elzéprod</button>
           </div>
-          <p id="profileStatus" class="status"></p>
-          <div class="field">
-            <label for="sellerName">Nom du vendeur</label>
-            <input type="text" id="sellerName" name="sellerName" required />
+        </div>
+
+        <div class="form-block">
+          <h3>Objet</h3>
+          <div class="grid">
+            <div class="field">
+              <label for="itemTitle">Désignation du bien</label>
+              <input type="text" id="itemTitle" name="itemTitle" required />
+            </div>
+            <div class="field">
+              <label for="itemDescription">Description / détails</label>
+              <textarea id="itemDescription" name="itemDescription" rows="3"></textarea>
+            </div>
+            <div class="field">
+              <label for="itemPrice">Prix de vente (€)</label>
+              <input type="number" id="itemPrice" name="itemPrice" step="0.01" min="0" required />
+            </div>
+            <div class="field">
+              <label for="shippingFee">Frais de livraison (€)</label>
+              <input type="number" id="shippingFee" name="shippingFee" step="0.01" min="0" />
+            </div>
+            <div class="field">
+              <label for="lbcFee">Frais Leboncoin (€)</label>
+              <input type="number" id="lbcFee" name="lbcFee" step="0.01" min="0" />
+            </div>
+            <div class="field">
+              <label for="totalPrice">Total payé (€)</label>
+              <input type="number" id="totalPrice" name="totalPrice" step="0.01" min="0" />
+            </div>
           </div>
-          <div class="field">
-            <label for="sellerAddress">Adresse du vendeur</label>
-            <input type="text" id="sellerAddress" name="sellerAddress" />
-          </div>
-          <div class="field">
-            <label for="buyerName">Nom de l'acheteur</label>
-            <input type="text" id="buyerName" name="buyerName" required />
-          </div>
-          <div class="field">
-            <label for="buyerAddress">Adresse de l'acheteur</label>
-            <input type="text" id="buyerAddress" name="buyerAddress" />
-          </div>
-          <div class="field">
-            <label for="deliveryAddress">Adresse de livraison</label>
-            <input type="text" id="deliveryAddress" name="deliveryAddress" />
-          </div>
-          <div class="actions">
-            <button type="button" id="elzeprodBtn" class="btn">Elzéprod</button>
-          </div>
-          <div class="field">
-            <label for="itemTitle">Désignation du bien</label>
-            <input type="text" id="itemTitle" name="itemTitle" required />
-          </div>
-          <div class="field">
-            <label for="itemDescription">Description / détails</label>
-            <textarea id="itemDescription" name="itemDescription" rows="3"></textarea>
-          </div>
-          <div class="field">
-            <label for="itemPrice">Prix de vente (€)</label>
-            <input type="number" id="itemPrice" name="itemPrice" step="0.01" min="0" required />
-          </div>
-          <div class="field">
-            <label for="shippingFee">Frais de livraison (€)</label>
-            <input type="number" id="shippingFee" name="shippingFee" step="0.01" min="0" />
-          </div>
-          <div class="field">
-            <label for="lbcFee">Frais Leboncoin (€)</label>
-            <input type="number" id="lbcFee" name="lbcFee" step="0.01" min="0" />
-          </div>
-          <div class="field">
-            <label for="totalPrice">Total payé (€)</label>
-            <input type="number" id="totalPrice" name="totalPrice" step="0.01" min="0" />
-          </div>
-          <div class="field">
-            <label for="saleDate">Date de la vente</label>
-            <input type="date" id="saleDate" name="saleDate" required />
-          </div>
-          <div class="field">
-            <label for="paymentMethod">Mode de paiement</label>
-            <select id="paymentMethod" name="paymentMethod">
-              <option value="">-- Choisir --</option>
-              <option value="Espèces">Espèces</option>
-              <option value="Virement">Virement</option>
-              <option value="Chèque">Chèque</option>
-              <option value="Carte bancaire">Carte bancaire</option>
-              <option value="PayPal">PayPal</option>
-              <option value="Autre">Autre</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="transactionId">N° de transaction / annonce</label>
-            <input type="text" id="transactionId" name="transactionId" />
+        </div>
+
+        <div class="form-block">
+          <h3>Paiement</h3>
+          <div class="grid">
+            <div class="field">
+              <label for="saleDate">Date de la vente</label>
+              <input type="date" id="saleDate" name="saleDate" required />
+            </div>
+            <div class="field">
+              <label for="paymentMethod">Mode de paiement</label>
+              <select id="paymentMethod" name="paymentMethod">
+                <option value="">-- Choisir --</option>
+                <option value="Espèces">Espèces</option>
+                <option value="Virement">Virement</option>
+                <option value="Chèque">Chèque</option>
+                <option value="Carte bancaire">Carte bancaire</option>
+                <option value="PayPal">PayPal</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="transactionId">N° de transaction / annonce</label>
+              <input type="text" id="transactionId" name="transactionId" />
+            </div>
           </div>
         </div>
       </form>
@@ -129,11 +151,12 @@
           <li><strong>Date de la vente :</strong> <span id="cDate"></span></li>
           <li><strong>Mode de paiement :</strong> <span id="cPay"></span></li>
           <li><strong>N° transaction / annonce :</strong> <span id="cTx"></span></li>
+          <li><strong>Profil vendeur :</strong> <a id="cProfile" href="#" target="_blank" rel="noopener">—</a></li>
         </ul>
         <p>Le bien est vendu en l'état, sans garantie, sauf mention contraire.</p>
         <div class="signatures">
           <div class="sig"><p>Signature du vendeur</p><div class="line"></div></div>
-          <div class="sig"><p>Signature de l'acheteur</p><div class="line"></div></div>
+          <div class="sig"><p>Signature de l'acheteur</p><div class="line"></div><p class="sig-name">Elzéprod Studios</p></div>
         </div>
         <p class="date-line">Fait le <span id="cToday"></span>.</p>
       </div>
@@ -145,6 +168,6 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
