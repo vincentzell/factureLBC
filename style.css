@@ -110,3 +110,41 @@ input, textarea, select {
   .app-header, .container > .card:not(:last-of-type), .app-footer { display: none; }
   .certificate { border: none; }
 }
+
+.form-block {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fafbff;
+}
+
+.form-block h3 {
+  margin: 0 0 0.75rem;
+  color: var(--primary);
+}
+
+.btn.strong {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+  font-weight: 700;
+}
+
+.btn.strong:hover {
+  background: #000;
+}
+
+.sig-name {
+  font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+  color: #111827;
+}
+
+.certificate a {
+  color: #1f6feb;
+  text-decoration: underline;
+  word-break: break-all;
+}
