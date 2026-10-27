@@ -6,13 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
       tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      const target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) target.classList.add('active');
     });
   });
 
   function setValue(id, value) {
     const el = document.getElementById(id);
-    if (!el || !value) return;
+    if (!el || value === null || value === undefined || value === '') return;
     if (el.tagName === 'SELECT') {
       let option = Array.from(el.options).find(o => o.value === value);
       if (!option) {
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     text = text.replace(/<\/(p|div|tr|li|td|h\d|table)>/gi, '\n');
     text = text.replace(/<[^>]+>/g, ' ');
     text = text.replace(/&nbsp;/gi, ' ');
-    text = text.replace(/&euro;/gi, 'â‚¬');
+    text = text.replace(/&euro;/gi, '€');
     text = text.replace(/&amp;/gi, '&');
     text = text.replace(/&lt;/gi, '<');
     text = text.replace(/&gt;/gi, '>');
@@ -64,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${yearM[1]}-${month}-${dayM[1].padStart(2, '0')}`;
   }
 
+  function cleanNumber(value) {
+    if (!value) return '';
+    return value.replace(/\s/g, '').replace(',', '.');
+  }
 
   function parseLeboncoin(raw) {
     const decoded = decodeQuotedPrintable(raw);
@@ -72,26 +77,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const buyerM = text.match(/Bonjour\s+([^,\n]+),/i);
     if (buyerM) result.buyerName = buyerM[1].trim();
+    const buyerLabel = text.match(/(?:acheteur|client|nom)\s*[:\-]\s*([^\n]+)/i);
+    if (!result.buyerName && buyerLabel) result.buyerName = buyerLabel[1].trim();
 
-    const itemM = text.match(/([A-Za-z0-9][^\nâ‚¬]{2,}?)\s+(\d[\d\s.,]*)\s*â‚¬/);
-    if (itemM) {
-      result.itemTitle = itemM[1].trim();
-      result.itemPrice = itemM[2].replace(/\s/g, '').replace(',', '.');
+    const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
+    const allPrices = [...text.matchAll(/(\d[\d\s.,]*)\s*€/g)].map(m => cleanNumber(m[1]));
+
+    const txM = text.match(/(?:numéro|numero|n°)?\s*de\s*transaction\s*[:\-]?\s*(\d{6,})/i)
+      || text.match(/transaction\s*(?:n°|numéro|numero|#)?\s*[:\-]?\s*(\d{6,})/i)
+      || text.match(/(?:commande|référence|reference)\s*(?:n°|numéro|numero|#)?\s*[:\-]?\s*(\d{6,})/i);
+    if (txM) result.transactionId = txM[1].trim();
+    if (!result.transactionId) {
+      const longNum = text.match(/\b(\d{8,})\b/);
+      if (longNum) result.transactionId = longNum[1];
     }
 
-    const txM = text.match(/NumÃ©ro de transaction\s*:\s*(\d+)/i);
-    if (txM) result.transactionId = txM[1].trim();
+    const itemM = text.match(/([A-Za-zÀ-ÿ0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
+    if (itemM) {
+      result.itemTitle = itemM[1].trim();
+      result.itemPrice = cleanNumber(itemM[2]);
+    }
 
-    const addrM = text.match(/adresse suivante\s*:\s*(.+?)(?:Voir le point|Merci|L['â€™]Ã©quipe|$)/is);
+    if (!result.itemTitle) {
+      for (let i = 0; i < lines.length; i++) {
+        if (/\d[\d\s.,]*\s*€/.test(lines[i]) && !/frais|livraison|total|transaction/i.test(lines[i])) {
+          if (i > 0 && !/€/.test(lines[i - 1])) {
+            result.itemTitle = lines[i - 1];
+          } else {
+            const beforePrice = lines[i].replace(/\d[\d\s.,]*\s*€.*$/, '').trim();
+            if (beforePrice.length > 2) result.itemTitle = beforePrice;
+          }
+          if (!result.itemPrice) {
+            const pm = lines[i].match(/(\d[\d\s.,]*)\s*€/);
+            if (pm) result.itemPrice = cleanNumber(pm[1]);
+          }
+          break;
+        }
+      }
+    }
+
+    const shipM = text.match(/frais de livraison[^\n€]*?(\d[\d\s.,]*)\s*€/i);
+    if (shipM) result.shippingFee = cleanNumber(shipM[1]);
+    const lbcM = text.match(/frais de (?:transaction|commission|leboncoin|sécurisée)[^\n€]*?(\d[\d\s.,]*)\s*€/i);
+    if (lbcM) result.lbcFee = cleanNumber(lbcM[1]);
+    const totalM = text.match(/total (?:payé|paye|total)[^\n€]*?(\d[\d\s.,]*)\s*€/i);
+    if (totalM) result.totalPrice = cleanNumber(totalM[1]);
+
+    if (!result.totalPrice && result.itemPrice && (result.shippingFee || result.lbcFee)) {
+      const sum = (parseFloat(result.itemPrice) || 0) + (parseFloat(result.shippingFee) || 0) + (parseFloat(result.lbcFee) || 0);
+      if (sum > 0) result.totalPrice = sum.toFixed(2);
+    }
+
+    if (!result.itemPrice && allPrices.length) {
+      const feeValues = [result.shippingFee, result.lbcFee, result.totalPrice].filter(Boolean);
+      const candidate = allPrices.find(p => !feeValues.includes(p));
+      if (candidate) result.itemPrice = candidate;
+    }
+
+    const addrM = text.match(/adresse suivante\s*:\s*(.+?)(?:Voir le point|Merci|L['’]équipe|$)/is);
     if (addrM) {
       result.buyerAddress = addrM[1].replace(/\s+/g, ' ').trim();
+    } else {
+      const postalM = text.match(/([A-Z][A-Z\s]{5,})\s+(\d{5})\s+([A-Z][A-Z\s]+)/);
+      if (postalM) result.buyerAddress = `${postalM[1].trim()} ${postalM[2]} ${postalM[3].trim()}`.replace(/\s+/g, ' ');
     }
 
     const saleDate = parseEmailDate(decoded);
     if (saleDate) result.saleDate = saleDate;
 
-    if (/transaction s[Ã©e]curis[Ã©e]e/i.test(text)) {
-      result.paymentMethod = 'Transaction sÃ©curisÃ©e Leboncoin';
+    if (/transaction s[ée]curis[ée]e/i.test(text)) {
+      result.paymentMethod = 'Transaction sécurisée Leboncoin';
     }
 
     const lineMatch = (label) => {
@@ -100,14 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return m ? m[1].trim() : '';
     };
     if (!result.sellerName) result.sellerName = lineMatch('vendeur') || lineMatch('vendu par');
-    if (!result.itemTitle) result.itemTitle = lineMatch('objet') || lineMatch('article') || lineMatch('annonce') || lineMatch('produit');
-    if (!result.itemDescription) result.itemDescription = lineMatch('description') || lineMatch('dÃ©tails');
+    if (!result.itemTitle) result.itemTitle = lineMatch('objet') || lineMatch('article') || lineMatch('annonce') || lineMatch('produit') || lineMatch('désignation');
+    if (!result.itemDescription) result.itemDescription = lineMatch('description') || lineMatch('détails');
     if (!result.itemPrice) {
-      const priceM = text.match(/(?:prix|montant|total)\s*[:\-]?\s*([\d\s.,]+)\s*â‚¬?/i);
-      if (priceM) result.itemPrice = priceM[1].replace(/\s/g, '').replace(',', '.');
+      const priceM = text.match(/(?:prix|montant|price)\s*[:\-]?\s*([\d\s.,]+)\s*€?/i);
+      if (priceM) result.itemPrice = cleanNumber(priceM[1]);
     }
     if (!result.transactionId) {
-      const txM2 = text.match(/(?:commande|rÃ©fÃ©rence|transaction|nÂ°\s*annonce|annonce)\s*(?:nÂ°|numÃ©ro|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
+      const txM2 = text.match(/(?:commande|référence|reference|transaction|n°\s*annonce|annonce)\s*(?:n°|numéro|numero|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
       if (txM2) result.transactionId = txM2[1].trim();
     }
     if (!result.saleDate) {
@@ -123,12 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const sellerAddr = lineMatch('adresse vendeur') || lineMatch('adresse du vendeur');
     if (sellerAddr) result.sellerAddress = sellerAddr;
-    const buyerAddr2 = lineMatch('adresse acheteur') || lineMatch('adresse de l.acheteur');
+    const buyerAddr2 = lineMatch('adresse acheteur') || lineMatch('adresse de l.acheteur') || lineMatch('adresse de livraison');
     if (buyerAddr2 && !result.buyerAddress) result.buyerAddress = buyerAddr2;
 
     return result;
   }
-
 
   const pdfInput = document.getElementById('pdfInput');
   const pdfStatus = document.getElementById('pdfStatus');
@@ -159,13 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = parseLeboncoin(text);
         Object.keys(data).forEach(k => setValue(k, data[k]));
         const filled = Object.keys(data).length;
-        pdfStatus.textContent = filled ? `PDF analysÃ© : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
+        pdfStatus.textContent = filled ? `PDF analysé : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
       } catch (err) {
         pdfStatus.textContent = 'Erreur lors de la lecture du PDF.';
         console.error(err);
       }
     });
   }
+
+  const generateBtn = document.getElementById('generateBtn');
   const printBtn = document.getElementById('printBtn');
   const resetBtn = document.getElementById('resetBtn');
   const cert = document.getElementById('certificate');
@@ -185,15 +241,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const g = (id) => document.getElementById(id).value.trim();
     document.getElementById('cSeller').textContent = g('sellerName');
-    document.getElementById('cSellerAddr').textContent = g('sellerAddress') || 'â€”';
+    document.getElementById('cSellerAddr').textContent = g('sellerAddress') || '—';
     document.getElementById('cBuyer').textContent = g('buyerName');
-    document.getElementById('cBuyerAddr').textContent = g('buyerAddress') || 'â€”';
+    document.getElementById('cBuyerAddr').textContent = g('buyerAddress') || '—';
     document.getElementById('cItem').textContent = g('itemTitle');
-    document.getElementById('cDesc').textContent = g('itemDescription') || 'â€”';
+    document.getElementById('cDesc').textContent = g('itemDescription') || '—';
     document.getElementById('cPrice').textContent = g('itemPrice');
+    document.getElementById('cShip').textContent = g('shippingFee') || '0';
+    document.getElementById('cLbc').textContent = g('lbcFee') || '0';
+    document.getElementById('cTotal').textContent = g('totalPrice') || '0';
     document.getElementById('cDate').textContent = formatDate(g('saleDate'));
-    document.getElementById('cPay').textContent = g('paymentMethod') || 'â€”';
-    document.getElementById('cTx').textContent = g('transactionId') || 'â€”';
+    document.getElementById('cPay').textContent = g('paymentMethod') || '—';
+    document.getElementById('cTx').textContent = g('transactionId') || '—';
     document.getElementById('cToday').textContent = new Date().toLocaleDateString('fr-FR');
     cert.classList.remove('hidden');
     cert.scrollIntoView({ behavior: 'smooth' });
@@ -209,5 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
   resetBtn.addEventListener('click', () => {
     document.getElementById('saleForm').reset();
     cert.classList.add('hidden');
+    if (pdfStatus) pdfStatus.textContent = '';
   });
 });
