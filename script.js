@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sellerSig = document.getElementById('cSellerSig');
     const sellerName = g('sellerName');
     const sellerProfileUrl = document.getElementById('sellerProfileUrl').value.trim();
-    sellerSig.textContent = sellerName || '';
+    sellerSig.textContent = sellerName || (sellerProfileUrl ? 'Voir le profil vendeur' : '');
     if (sellerProfileUrl) {
       sellerSig.href = sellerProfileUrl;
     } else {
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileLink = document.getElementById('cProfile');
     if (profileUrl) {
       profileLink.href = profileUrl;
-      profileLink.textContent = profileUrl;
+      profileLink.textContent = 'Voir le profil vendeur';
     } else {
       profileLink.removeAttribute('href');
       profileLink.textContent = '—';
