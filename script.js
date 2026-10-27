@@ -92,6 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (longNum) result.transactionId = longNum[1];
     }
 
+    // Designation is located right after "commande ci-dessous :"
+    const designationM = text.match(/commande ci[-\s]*dessous\s*:\s*(.+?)(?:\s+\d[\d\s.,]*\s*€|$)/i);
+    if (designationM) {
+      result.itemTitle = designationM[1].trim();
+    }
+
     const itemM = text.match(/([A-Za-zÀ-ÿ0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
     if (itemM) {
       result.itemTitle = itemM[1].trim();
@@ -203,6 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sellerAddr) result.sellerAddress = sellerAddr;
     const buyerAddr2 = lineMatch('adresse acheteur') || lineMatch('adresse de l.acheteur') || lineMatch('adresse de livraison');
     if (buyerAddr2 && !result.buyerAddress) result.buyerAddress = buyerAddr2;
+
+    if (!result.itemDescription && result.itemTitle) result.itemDescription = result.itemTitle;
 
     return result;
   }
