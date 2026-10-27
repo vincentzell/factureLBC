@@ -323,6 +323,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cDate').textContent = formatDate(g('saleDate'));
     document.getElementById('cPay').textContent = g('paymentMethod') || '—';
     document.getElementById('cTx').textContent = g('transactionId') || '—';
+    const profileUrl = document.getElementById('sellerProfileUrl').value.trim();
+    const profileLink = document.getElementById('cProfile');
+    if (profileUrl) {
+      profileLink.href = profileUrl;
+      profileLink.textContent = profileUrl;
+    } else {
+      profileLink.removeAttribute('href');
+      profileLink.textContent = '—';
+    }
     document.getElementById('cToday').textContent = new Date().toLocaleDateString('fr-FR');
     cert.classList.remove('hidden');
     cert.scrollIntoView({ behavior: 'smooth' });
