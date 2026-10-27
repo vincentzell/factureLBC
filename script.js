@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Designation is located right after "commande ci-dessous :"
-    const designationM = text.match(/commande ci[-\s]*dessous\s*:\s*(.+?)(?:\s+\d[\d\s.,]*\s*€|$)/i);
+    const designationM = text.match(/commande ci[-\s]*dessous\s*:\s*([\s\S]+?)(?:\s+\d[\d\s.,]*\s*€|$)/i);
     if (designationM) {
       result.itemTitle = designationM[1].trim();
     }
