@@ -93,9 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Designation is located right after "commande ci-dessous :"
-    const designationM = text.match(/commande ci[-\s]*dessous\s*:\s*([\s\S]+?)(?:\s+\d[\d\s.,]*\s*€|$)/i);
+    const designationM = text.match(/commande ci[\s\-–—‑]*dessous\s*:\s*([\s\S]+?)(?:\s+\d[\d\s.,]*\s*€|$)/i);
     if (designationM) {
-      result.itemTitle = designationM[1].trim();
+      result.itemTitle = designationM[1].trim().replace(/\s+/g, ' ');
+    }
+    if (!result.itemTitle) {
+      const parts = text.split(/commande ci[\s\-–—‑]*dessous\s*:/i);
+      if (parts.length > 1) {
+        const after = parts[1].trim();
+        const candidate = after.split(/\s+\d[\d\s.,]*\s*€/)[0].trim();
+        if (candidate) result.itemTitle = candidate.replace(/\s+/g, ' ');
+      }
     }
 
     const itemM = text.match(/([A-Za-zÀ-ÿ0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
