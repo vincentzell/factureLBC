@@ -152,7 +152,42 @@ document.addEventListener('DOMContentLoaded', () => {
     parseStatus.textContent = '';
   });
 
-  const generateBtn = document.getElementById('generateBtn');
+  const pdfInput = document.getElementById('pdfInput');
+  const pdfStatus = document.getElementById('pdfStatus');
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  async function extractPdfText(file) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const strings = content.items.map(item => item.str);
+      fullText += strings.join(' ') + '\n';
+    }
+    return fullText;
+  }
+
+  if (pdfInput) {
+    pdfInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      pdfStatus.textContent = 'Lecture du PDF...';
+      try {
+        const text = await extractPdfText(file);
+        const data = parseLeboncoin(text);
+        Object.keys(data).forEach(k => setValue(k, data[k]));
+        const filled = Object.keys(data).length;
+        pdfStatus.textContent = filled ? `PDF analysé : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
+      } catch (err) {
+        pdfStatus.textContent = 'Erreur lors de la lecture du PDF.';
+        console.error(err);
+      }
+    });
+  }
   const printBtn = document.getElementById('printBtn');
   const resetBtn = document.getElementById('resetBtn');
   const cert = document.getElementById('certificate');
