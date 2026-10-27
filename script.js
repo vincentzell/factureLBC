@@ -65,6 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${yearM[1]}-${month}-${dayM[1].padStart(2, '0')}`;
   }
 
+  function normalizeProfileUrl(url) {
+    const m = (url || '').match(/https?:\/\/(?:www\.)?leboncoin\.fr\/profile\/[0-9a-f-]+/i);
+    return m ? m[0] : (url || '').trim();
+  }
+
   function cleanNumber(value) {
     if (!value) return '';
     return value.replace(/\s/g, '').replace(',', '.');
@@ -97,6 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (designationM) {
       result.itemTitle = designationM[1].trim().replace(/\s+/g, ' ');
     }
+    const firstPriceIndex = text.search(/\d[\d\s.,]*\s*€/);
+    if (firstPriceIndex > 0 && !result.itemDescription) {
+      result.itemDescription = text.slice(0, firstPriceIndex).trim();
+    }
     if (!result.itemTitle) {
       const parts = text.split(/commande ci[\s\-–—‑]*dessous\s*:/i);
       if (parts.length > 1) {
@@ -115,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!result.itemTitle) {
-      const firstPriceIndex = text.search(/\d[\d\s.,]*\s*€/);
       if (firstPriceIndex > 0) {
         const before = text.slice(0, firstPriceIndex).trim();
         const words = before.split(/\s+/);
@@ -127,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
           titleWords.unshift(w);
         }
         if (titleWords.length) result.itemTitle = titleWords.join(' ');
+        if (!result.itemDescription) result.itemDescription = before;
       }
     }
 
@@ -277,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sellerProfileUrl = document.getElementById('sellerProfileUrl');
   if (fetchProfileBtn) {
     fetchProfileBtn.addEventListener('click', async () => {
-      const url = (sellerProfileUrl && sellerProfileUrl.value || '').trim();
+      const url = normalizeProfileUrl(sellerProfileUrl && sellerProfileUrl.value || '');
       if (!url) {
         if (profileStatus) profileStatus.textContent = 'Colle une URL de profil Leboncoin.';
         return;
@@ -350,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cSellerAddr').textContent = g('sellerAddress') || '—';
     const sellerSig = document.getElementById('cSellerSig');
     const sellerName = g('sellerName');
-    const sellerProfileUrl = document.getElementById('sellerProfileUrl').value.trim();
+    const sellerProfileUrl = normalizeProfileUrl(document.getElementById('sellerProfileUrl').value.trim());
     const uidMatch = sellerProfileUrl.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
     const uid = uidMatch ? uidMatch[0] : sellerProfileUrl;
     sellerSig.textContent = sellerName || (sellerProfileUrl ? uid : '');
@@ -370,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cDate').textContent = formatDate(g('saleDate'));
     document.getElementById('cPay').textContent = g('paymentMethod') || '—';
     document.getElementById('cTx').textContent = g('transactionId') || '—';
-    const profileUrl = document.getElementById('sellerProfileUrl').value.trim();
+    const profileUrl = normalizeProfileUrl(document.getElementById('sellerProfileUrl').value.trim());
     const profileLink = document.getElementById('cProfile');
     if (profileUrl) {
       profileLink.href = profileUrl;
