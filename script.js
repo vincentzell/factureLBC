@@ -210,7 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
       pdfStatus.textContent = 'Lecture du PDF...';
       try {
         const text = await extractPdfText(file);
+        console.log('PDF text:', text);
         const data = parseLeboncoin(text);
+        console.log('Parsed data:', data);
         Object.keys(data).forEach(k => setValue(k, data[k]));
         const filled = Object.keys(data).length;
         pdfStatus.textContent = filled ? `PDF analysé : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
