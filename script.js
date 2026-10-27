@@ -10,11 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const parseBtn = document.getElementById('parseBtn');
-  const clearPasteBtn = document.getElementById('clearPasteBtn');
-  const pasteInput = document.getElementById('pasteInput');
-  const parseStatus = document.getElementById('parseStatus');
-
   function setValue(id, value) {
     const el = document.getElementById(id);
     if (!el || !value) return;
@@ -42,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     text = text.replace(/<\/(p|div|tr|li|td|h\d|table)>/gi, '\n');
     text = text.replace(/<[^>]+>/g, ' ');
     text = text.replace(/&nbsp;/gi, ' ');
-    text = text.replace(/&euro;/gi, '€');
+    text = text.replace(/&euro;/gi, 'â‚¬');
     text = text.replace(/&amp;/gi, '&');
     text = text.replace(/&lt;/gi, '<');
     text = text.replace(/&gt;/gi, '>');
@@ -78,16 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const buyerM = text.match(/Bonjour\s+([^,\n]+),/i);
     if (buyerM) result.buyerName = buyerM[1].trim();
 
-    const itemM = text.match(/([A-Za-z0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
+    const itemM = text.match(/([A-Za-z0-9][^\nâ‚¬]{2,}?)\s+(\d[\d\s.,]*)\s*â‚¬/);
     if (itemM) {
       result.itemTitle = itemM[1].trim();
       result.itemPrice = itemM[2].replace(/\s/g, '').replace(',', '.');
     }
 
-    const txM = text.match(/Numéro de transaction\s*:\s*(\d+)/i);
+    const txM = text.match(/NumÃ©ro de transaction\s*:\s*(\d+)/i);
     if (txM) result.transactionId = txM[1].trim();
 
-    const addrM = text.match(/adresse suivante\s*:\s*(.+?)(?:Voir le point|Merci|L['’]équipe|$)/is);
+    const addrM = text.match(/adresse suivante\s*:\s*(.+?)(?:Voir le point|Merci|L['â€™]Ã©quipe|$)/is);
     if (addrM) {
       result.buyerAddress = addrM[1].replace(/\s+/g, ' ').trim();
     }
@@ -95,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const saleDate = parseEmailDate(decoded);
     if (saleDate) result.saleDate = saleDate;
 
-    if (/transaction s[ée]curis[ée]e/i.test(text)) {
-      result.paymentMethod = 'Transaction sécurisée Leboncoin';
+    if (/transaction s[Ã©e]curis[Ã©e]e/i.test(text)) {
+      result.paymentMethod = 'Transaction sÃ©curisÃ©e Leboncoin';
     }
 
     const lineMatch = (label) => {
@@ -106,13 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     if (!result.sellerName) result.sellerName = lineMatch('vendeur') || lineMatch('vendu par');
     if (!result.itemTitle) result.itemTitle = lineMatch('objet') || lineMatch('article') || lineMatch('annonce') || lineMatch('produit');
-    if (!result.itemDescription) result.itemDescription = lineMatch('description') || lineMatch('détails');
+    if (!result.itemDescription) result.itemDescription = lineMatch('description') || lineMatch('dÃ©tails');
     if (!result.itemPrice) {
-      const priceM = text.match(/(?:prix|montant|total)\s*[:\-]?\s*([\d\s.,]+)\s*€?/i);
+      const priceM = text.match(/(?:prix|montant|total)\s*[:\-]?\s*([\d\s.,]+)\s*â‚¬?/i);
       if (priceM) result.itemPrice = priceM[1].replace(/\s/g, '').replace(',', '.');
     }
     if (!result.transactionId) {
-      const txM2 = text.match(/(?:commande|référence|transaction|n°\s*annonce|annonce)\s*(?:n°|numéro|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
+      const txM2 = text.match(/(?:commande|rÃ©fÃ©rence|transaction|nÂ°\s*annonce|annonce)\s*(?:nÂ°|numÃ©ro|#)?\s*[:\-]?\s*([A-Za-z0-9\-]+)/i);
       if (txM2) result.transactionId = txM2[1].trim();
     }
     if (!result.saleDate) {
@@ -134,23 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return result;
   }
 
-
-  parseBtn.addEventListener('click', () => {
-    const text = pasteInput.value.trim();
-    if (!text) {
-      parseStatus.textContent = 'Colle d\'abord une confirmation.';
-      return;
-    }
-    const data = parseLeboncoin(text);
-    Object.keys(data).forEach(k => setValue(k, data[k]));
-    const filled = Object.keys(data).length;
-    parseStatus.textContent = filled ? `${filled} champ(s) rempli(s) automatiquement. Vérifie et complète.` : 'Aucun champ reconnu. Remplis manuellement.';
-  });
-
-  clearPasteBtn.addEventListener('click', () => {
-    pasteInput.value = '';
-    parseStatus.textContent = '';
-  });
 
   const pdfInput = document.getElementById('pdfInput');
   const pdfStatus = document.getElementById('pdfStatus');
@@ -181,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = parseLeboncoin(text);
         Object.keys(data).forEach(k => setValue(k, data[k]));
         const filled = Object.keys(data).length;
-        pdfStatus.textContent = filled ? `PDF analysé : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
+        pdfStatus.textContent = filled ? `PDF analysÃ© : ${filled} champ(s) rempli(s).` : 'Aucun champ reconnu dans le PDF.';
       } catch (err) {
         pdfStatus.textContent = 'Erreur lors de la lecture du PDF.';
         console.error(err);
@@ -207,15 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const g = (id) => document.getElementById(id).value.trim();
     document.getElementById('cSeller').textContent = g('sellerName');
-    document.getElementById('cSellerAddr').textContent = g('sellerAddress') || '—';
+    document.getElementById('cSellerAddr').textContent = g('sellerAddress') || 'â€”';
     document.getElementById('cBuyer').textContent = g('buyerName');
-    document.getElementById('cBuyerAddr').textContent = g('buyerAddress') || '—';
+    document.getElementById('cBuyerAddr').textContent = g('buyerAddress') || 'â€”';
     document.getElementById('cItem').textContent = g('itemTitle');
-    document.getElementById('cDesc').textContent = g('itemDescription') || '—';
+    document.getElementById('cDesc').textContent = g('itemDescription') || 'â€”';
     document.getElementById('cPrice').textContent = g('itemPrice');
     document.getElementById('cDate').textContent = formatDate(g('saleDate'));
-    document.getElementById('cPay').textContent = g('paymentMethod') || '—';
-    document.getElementById('cTx').textContent = g('transactionId') || '—';
+    document.getElementById('cPay').textContent = g('paymentMethod') || 'â€”';
+    document.getElementById('cTx').textContent = g('transactionId') || 'â€”';
     document.getElementById('cToday').textContent = new Date().toLocaleDateString('fr-FR');
     cert.classList.remove('hidden');
     cert.scrollIntoView({ behavior: 'smooth' });
@@ -230,8 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   resetBtn.addEventListener('click', () => {
     document.getElementById('saleForm').reset();
-    pasteInput.value = '';
-    parseStatus.textContent = '';
     cert.classList.add('hidden');
   });
 });
