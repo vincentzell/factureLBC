@@ -28,6 +28,14 @@
       <form id="saleForm">
         <div class="grid">
           <div class="field">
+            <label for="sellerProfileUrl">Profil vendeur (URL Leboncoin)</label>
+            <input type="text" id="sellerProfileUrl" placeholder="https://www.leboncoin.fr/profile/..." />
+          </div>
+          <div class="actions">
+            <button type="button" id="fetchProfileBtn" class="btn">Récupérer profil</button>
+          </div>
+          <p id="profileStatus" class="status"></p>
+          <div class="field">
             <label for="sellerName">Nom du vendeur</label>
             <input type="text" id="sellerName" name="sellerName" required />
           </div>
@@ -44,6 +52,13 @@
             <input type="text" id="buyerAddress" name="buyerAddress" />
           </div>
           <div class="field">
+            <label for="deliveryAddress">Adresse de livraison</label>
+            <input type="text" id="deliveryAddress" name="deliveryAddress" />
+          </div>
+          <div class="actions">
+            <button type="button" id="elzeprodBtn" class="btn">Elzéprod</button>
+          </div>
+          <div class="field">
             <label for="itemTitle">Désignation du bien</label>
             <input type="text" id="itemTitle" name="itemTitle" required />
           </div>
@@ -54,6 +69,18 @@
           <div class="field">
             <label for="itemPrice">Prix de vente (€)</label>
             <input type="number" id="itemPrice" name="itemPrice" step="0.01" min="0" required />
+          </div>
+          <div class="field">
+            <label for="shippingFee">Frais de livraison (€)</label>
+            <input type="number" id="shippingFee" name="shippingFee" step="0.01" min="0" />
+          </div>
+          <div class="field">
+            <label for="lbcFee">Frais Leboncoin (€)</label>
+            <input type="number" id="lbcFee" name="lbcFee" step="0.01" min="0" />
+          </div>
+          <div class="field">
+            <label for="totalPrice">Total payé (€)</label>
+            <input type="number" id="totalPrice" name="totalPrice" step="0.01" min="0" />
           </div>
           <div class="field">
             <label for="saleDate">Date de la vente</label>
@@ -96,6 +123,9 @@
           <li><strong>Désignation :</strong> <span id="cItem"></span></li>
           <li><strong>Description :</strong> <span id="cDesc"></span></li>
           <li><strong>Prix de vente :</strong> <span id="cPrice"></span> €</li>
+          <li><strong>Frais de livraison :</strong> <span id="cShip"></span> €</li>
+          <li><strong>Frais Leboncoin :</strong> <span id="cLbc"></span> €</li>
+          <li><strong>Total payé :</strong> <span id="cTotal"></span> €</li>
           <li><strong>Date de la vente :</strong> <span id="cDate"></span></li>
           <li><strong>Mode de paiement :</strong> <span id="cPay"></span></li>
           <li><strong>N° transaction / annonce :</strong> <span id="cTx"></span></li>
