@@ -69,8 +69,22 @@ input, textarea, select {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+  align-items: end;
+}
+
+.status {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .field { display: flex; flex-direction: column; }
@@ -144,13 +158,21 @@ input, textarea, select {
   color: #111827;
 }
 
-.certificate a {
+.field .btn {
+  width: 100%;
+}
   color: #1f6feb;
   text-decoration: underline;
   word-break: break-all;
 }
 
 a.sig-name {
+
+.certificate a {
+  color: #1f6feb;
+  text-decoration: underline;
+  word-break: break-all;
+}
   color: #111827;
   text-decoration: none;
 }
