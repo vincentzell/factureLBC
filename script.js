@@ -351,7 +351,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sellerSig = document.getElementById('cSellerSig');
     const sellerName = g('sellerName');
     const sellerProfileUrl = document.getElementById('sellerProfileUrl').value.trim();
-    sellerSig.textContent = sellerName || (sellerProfileUrl ? 'Voir le profil vendeur' : '');
+    const uidMatch = sellerProfileUrl.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    const uid = uidMatch ? uidMatch[0] : sellerProfileUrl;
+    sellerSig.textContent = sellerName || (sellerProfileUrl ? uid : '');
     if (sellerProfileUrl) {
       sellerSig.href = sellerProfileUrl;
     } else {
@@ -370,9 +372,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cTx').textContent = g('transactionId') || '—';
     const profileUrl = document.getElementById('sellerProfileUrl').value.trim();
     const profileLink = document.getElementById('cProfile');
+    const uidMatch = profileUrl.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+    const uid = uidMatch ? uidMatch[0] : profileUrl;
     if (profileUrl) {
       profileLink.href = profileUrl;
-      profileLink.textContent = 'Voir le profil vendeur';
+      profileLink.textContent = uid || profileUrl;
     } else {
       profileLink.removeAttribute('href');
       profileLink.textContent = '—';
