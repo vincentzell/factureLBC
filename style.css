@@ -113,8 +113,22 @@ input, textarea, select {
 }
 .certificate.hidden { display: none; }
 .certificate h3 { text-align: center; margin-top: 0; }
-.signatures { display: flex; justify-content: space-between; margin-top: 2rem; gap: 2rem; }
-.sig { flex: 1; text-align: center; }
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 2rem;
+  gap: 2rem;
+}
+
+.sig {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
 .line { border-bottom: 1px solid var(--text); height: 40px; }
 .date-line { margin-top: 1.5rem; }
 
