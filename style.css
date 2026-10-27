@@ -139,7 +139,8 @@ input, textarea, select {
   font-family: "Brush Script MT", "Segoe Script", "Lucida Handwriting", cursive;
   font-weight: 700;
   font-size: 1.5rem;
-  margin-top: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
   color: #111827;
 }
 
