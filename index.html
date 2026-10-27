@@ -14,31 +14,13 @@
 
   <main class="container">
     <section class="card">
-      <h2>1. Source des données</h2>
-      <div class="tabs">
-        <button class="tab active" data-tab="paste">Coller une confirmation Leboncoin</button>
-        <button class="tab" data-tab="manual">Saisie manuelle</button>
+      <h2>1. Importer une confirmation (PDF)</h2>
+      <div class="pdf-import">
+        <label for="pdfInput">Importer une confirmation de vente Leboncoin (PDF) :</label>
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <p id="pdfStatus" class="status"></p>
       </div>
-
-      <div id="tab-paste" class="tab-content active">
-        <label for="pasteInput">Colle ici le texte de la confirmation de vente Leboncoin (email ou copie d'écran) :</label>
-        <textarea id="pasteInput" rows="10" placeholder="Colle le texte de la confirmation Leboncoin..."></textarea>
-        <div class="actions">
-          <button id="parseBtn" class="btn primary">Analyser</button>
-          <button id="clearPasteBtn" class="btn">Effacer</button>
-        </div>
-        <p id="parseStatus" class="status"></p>
-
-        <div class="pdf-import">
-          <label for="pdfInput">Ou importer une confirmation PDF :</label>
-          <input type="file" id="pdfInput" accept="application/pdf" />
-          <p id="pdfStatus" class="status"></p>
-        </div>
-      </div>
-
-      <div id="tab-manual" class="tab-content">
-        <p class="hint">Remplis directement les champs ci-dessous (étape 2).</p>
-      </div>
+      <p class="hint">Ou remplis manuellement les champs ci-dessous.</p>
     </section>
 
     <section class="card">
