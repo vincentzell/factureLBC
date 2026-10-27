@@ -121,8 +121,16 @@ input, textarea, select {
 .app-footer { text-align: center; color: var(--muted); padding: 1rem; }
 
 @media print {
-  .app-header, .container > .card:not(:last-of-type), .app-footer { display: none; }
-  .certificate { border: none; }
+  .app-header, .app-footer, .actions, .card > h2, .container > .card:not(:last-of-type) {
+    display: none;
+  }
+  .container > .card {
+    box-shadow: none;
+    border: none;
+  }
+  .certificate {
+    border: none;
+  }
 }
 
 .form-block {
