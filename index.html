@@ -28,6 +28,12 @@
           <button id="clearPasteBtn" class="btn">Effacer</button>
         </div>
         <p id="parseStatus" class="status"></p>
+
+        <div class="pdf-import">
+          <label for="pdfInput">Ou importer une confirmation PDF :</label>
+          <input type="file" id="pdfInput" accept="application/pdf" />
+          <p id="pdfStatus" class="status"></p>
+        </div>
       </div>
 
       <div id="tab-manual" class="tab-content">
@@ -126,6 +132,7 @@
     <p>Généré localement – aucune donnée n'est envoyée à un serveur.</p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
