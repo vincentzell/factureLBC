@@ -107,8 +107,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const itemM = text.match(/([A-Za-zÀ-ÿ0-9][^\n€]{2,}?)\s+(\d[\d\s.,]*)\s*€/);
-    if (itemM) {
+    if (!result.itemTitle && itemM) {
       result.itemTitle = itemM[1].trim();
+    }
+    if (itemM && !result.itemPrice) {
       result.itemPrice = cleanNumber(itemM[2]);
     }
 
