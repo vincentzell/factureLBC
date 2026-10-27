@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let extra = '';
         if (emailM) extra += ' Email: ' + emailM[0];
         if (phoneM) extra += ' Tél: ' + phoneM[0];
-        if (profileStatus) profileStatus.textContent = (nameM ? 'Profil récupéré.' : 'Profil chargé, nom non trouvé (colle-le manuellement).') + extra;
+        if (profileStatus) profileStatus.textContent = (nameM ? 'Profil récupéré (nom). Adresse/ville non exposée par Leboncoin, à compléter manuellement.' : 'Profil chargé, nom non trouvé (colle-le manuellement).') + extra;
       } catch (err) {
         if (profileStatus) profileStatus.textContent = 'Impossible de récupérer le profil (CORS/réseau). Colle les infos manuellement.';
         console.error(err);
