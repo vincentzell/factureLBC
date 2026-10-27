@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attestation de vente – Leboncoin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Attestation de vente</h1>
+    <p class="subtitle">Générer une attestation de vente à partir d'une confirmation Leboncoin ou en saisie manuelle.</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>1. Source des données</h2>
+      <div class="tabs">
+        <button class="tab active" data-tab="paste">Coller une confirmation Leboncoin</button>
+        <button class="tab" data-tab="manual">Saisie manuelle</button>
+      </div>
+
+      <div id="tab-paste" class="tab-content active">
+        <label for="pasteInput">Colle ici le texte de la confirmation de vente Leboncoin (email ou copie d'écran) :</label>
+        <textarea id="pasteInput" rows="10" placeholder="Colle le texte de la confirmation Leboncoin..."></textarea>
+        <div class="actions">
+          <button id="parseBtn" class="btn primary">Analyser</button>
+          <button id="clearPasteBtn" class="btn">Effacer</button>
+        </div>
+        <p id="parseStatus" class="status"></p>
+      </div>
+
+      <div id="tab-manual" class="tab-content">
+        <p class="hint">Remplis directement les champs ci-dessous (étape 2).</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. Informations de la vente</h2>
+      <form id="saleForm">
+        <div class="grid">
+          <div class="field">
+            <label for="sellerName">Nom du vendeur</label>
+            <input type="text" id="sellerName" name="sellerName" required />
+          </div>
+          <div class="field">
+            <label for="sellerAddress">Adresse du vendeur</label>
+            <input type="text" id="sellerAddress" name="sellerAddress" />
+          </div>
+          <div class="field">
+            <label for="buyerName">Nom de l'acheteur</label>
+            <input type="text" id="buyerName" name="buyerName" required />
+          </div>
+          <div class="field">
+            <label for="buyerAddress">Adresse de l'acheteur</label>
+            <input type="text" id="buyerAddress" name="buyerAddress" />
+          </div>
+          <div class="field">
+            <label for="itemTitle">Désignation du bien</label>
+            <input type="text" id="itemTitle" name="itemTitle" required />
+          </div>
+          <div class="field">
+            <label for="itemDescription">Description / détails</label>
+            <textarea id="itemDescription" name="itemDescription" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label for="itemPrice">Prix de vente (€)</label>
+            <input type="number" id="itemPrice" name="itemPrice" step="0.01" min="0" required />
+          </div>
+          <div class="field">
+            <label for="saleDate">Date de la vente</label>
+            <input type="date" id="saleDate" name="saleDate" required />
+          </div>
+          <div class="field">
+            <label for="paymentMethod">Mode de paiement</label>
+            <select id="paymentMethod" name="paymentMethod">
+              <option value="">-- Choisir --</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Virement">Virement</option>
+              <option value="Chèque">Chèque</option>
+              <option value="Carte bancaire">Carte bancaire</option>
+              <option value="PayPal">PayPal</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="transactionId">N° de transaction / annonce</label>
+            <input type="text" id="transactionId" name="transactionId" />
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>3. Attestation</h2>
+      <div class="actions">
+        <button id="generateBtn" class="btn primary">Générer l'attestation</button>
+        <button id="printBtn" class="btn">Imprimer / PDF</button>
+        <button id="resetBtn" class="btn">Réinitialiser</button>
+      </div>
+
+      <div id="certificate" class="certificate hidden">
+        <h3>ATTESTATION DE VENTE</h3>
+        <p>Je soussigné(e), <span id="cSeller"></span>, demeurant <span id="cSellerAddr"></span>,</p>
+        <p>certifie avoir vendu à <span id="cBuyer"></span>, demeurant <span id="cBuyerAddr"></span>,</p>
+        <p>le bien suivant :</p>
+        <ul>
+          <li><strong>Désignation :</strong> <span id="cItem"></span></li>
+          <li><strong>Description :</strong> <span id="cDesc"></span></li>
+          <li><strong>Prix de vente :</strong> <span id="cPrice"></span> €</li>
+          <li><strong>Date de la vente :</strong> <span id="cDate"></span></li>
+          <li><strong>Mode de paiement :</strong> <span id="cPay"></span></li>
+          <li><strong>N° transaction / annonce :</strong> <span id="cTx"></span></li>
+        </ul>
+        <p>Le bien est vendu en l'état, sans garantie, sauf mention contraire.</p>
+        <div class="signatures">
+          <div class="sig"><p>Signature du vendeur</p><div class="line"></div></div>
+          <div class="sig"><p>Signature de l'acheteur</p><div class="line"></div></div>
+        </div>
+        <p class="date-line">Fait le <span id="cToday"></span>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Généré localement – aucune donnée n'est envoyée à un serveur.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
