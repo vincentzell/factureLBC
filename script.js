@@ -372,8 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cTx').textContent = g('transactionId') || '—';
     const profileUrl = document.getElementById('sellerProfileUrl').value.trim();
     const profileLink = document.getElementById('cProfile');
-    const uidMatch = profileUrl.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
-    const uid = uidMatch ? uidMatch[0] : profileUrl;
     if (profileUrl) {
       profileLink.href = profileUrl;
       profileLink.textContent = uid || profileUrl;
