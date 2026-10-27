@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch('https://r.jina.ai/' + profileUrl);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const md = await res.text();
-        const nameM = md.match(/^#\s+(.+)$/m);
+        const nameM = md.match(/Title:\s*Profil de (.+)/i) || md.match(/^#\s+(.+)$/m);
         if (nameM) setValue('sellerName', nameM[1].trim());
         const locM = md.match(/Localisé dans le département (.+)/i) || md.match(/Membre depuis [^\n]*\n\n\*\s*(.+)/i);
         if (locM) setValue('sellerAddress', locM[1].trim());
